@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 __all__ = ['FunctionTable']
 
 
@@ -206,5 +204,3 @@ class BoundFunctionTableinsideClassTests (unittest.TestCase, GeneralFunctionTabl
 
 
 
-if __name__ == '__main__':
-    unittest.main()
