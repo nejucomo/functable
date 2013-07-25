@@ -1,3 +1,77 @@
+"""A Mapping abstraction for grouping functions.
+
+A simple example:
+>>> from functable import FunctionTable
+>>> table = FunctionTable()
+>>> @table.register
+... def add(x, y):
+...     return x + y
+...
+>>> @table.register
+... def mult(x, y):
+...     return x * y
+...
+>>> sorted(table.keys())
+['add', 'mult']
+>>> operation = 'add'
+>>> table[operation](2, 3)
+5
+>>> operation = 'mult'
+>>> table[operation](2, 3)
+6
+>>> operation = 'modulus'
+>>> table[operation](2, 3)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+KeyError: 'modulus'
+
+A FunctionTable is useful for doing dynamic dispatch in a more principled
+manner.  For example, consider a script function which implements two
+commands: "add" and "mult" so that it can be called like this:
+
+$ myscript.py add 2 3
+5
+$ myscript.py mult 2 3
+6
+
+A common way to write this looks like this:
+>>> def cmd_add(x, y):
+...     return x + y
+...
+>>> def cmd_mult(x, y):
+...     return x * y
+...
+>>> def main():
+...     command = sys.argv[1]
+...     args = map(int, sys.argv[2:])
+...     func = globals()['cmd_' + command]
+...     print func(*args)
+...
+
+With functable, we can write this:
+
+>>> from functable import FunctionTable
+>>> commands = FunctionTable()
+>>> @commands.register
+... def add(x, y):
+...     return x + y
+...
+>>> @commands.register
+... def mult(x, y):
+...     return x + y
+...
+>>> def main():
+...     command = sys.argv[1]
+...     args = map(int, sys.argv[2:])
+...     func = commands[command]
+...     print func(*args)
+...
+
+Notice that if code wants to call the command functions elsewhere,
+in the first example they must call "cmd_add(2, 3)", but with a
+FunctionTable approach, they can naturally call "add(2, 3)".
+"""
+
 __all__ = ['FunctionTable', 'FunctionTableProperty']
 
 
