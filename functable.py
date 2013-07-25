@@ -1,9 +1,11 @@
-__all__ = ['FunctionTable']
+__all__ = ['FunctionTable', 'FunctionTableProperty']
 
 
 import unittest
 from collections import Mapping
-from types import MethodType
+from types import MethodType, FunctionType
+
+from proptools import LazyProperty
 
 
 
@@ -17,15 +19,6 @@ class FunctionTable (Mapping):
         self._table[f.__name__] = f
         return f
 
-    def bind_instance(self, instance):
-        """Given a FunctionTable of unbound methods, return a function table of methods bound to instance."""
-        cls = type(instance)
-        boundtable = FunctionTable()
-        for name, unbound in self.iteritems():
-            bound = MethodType(unbound, instance, cls)
-            boundtable.register(bound)
-        return boundtable
-
     # Mapping interface:
     def __getitem__(self, methodname):
         return self._table[methodname]
@@ -35,6 +28,23 @@ class FunctionTable (Mapping):
 
     def __len__(self):
         return len(self._table)
+
+
+class FunctionTableProperty (FunctionTable, LazyProperty):
+
+    def __init__(self):
+        FunctionTable.__init__(self)
+
+        def bind(instance):
+            """Return a function table of methods bound to instance."""
+            cls = type(instance)
+            boundtable = FunctionTable()
+            for name, unbound in self.iteritems():
+                bound = MethodType(unbound, instance, cls)
+                boundtable.register(bound)
+            return boundtable
+
+        LazyProperty.__init__(self, bind)
 
 
 
@@ -59,6 +69,9 @@ class GeneralFunctionTableTests (object):
     # The former method is used for this test criterion:
     def _assertIsEquivalent(self, a, b):
         self.assertIs(self._get_func(a), self._get_func(b))
+
+    # This is used by some test cases:
+    funcnames = ['add', 'mult']
 
     # Tests:
     def test_len(self):
@@ -139,38 +152,7 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
 
 
-class BoundFunctionTableOutsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
-
-    addargs = (3,)
-    addresult = 45
-
-    multargs = (3,)
-    multresult = 126
-
-    def setUp(self):
-
-        unbound = FunctionTable()
-
-        class C (object):
-            x = 42
-
-            @unbound.register
-            def add(self, y):
-                return self.x + y
-
-            @unbound.register
-            def mult(self, y):
-                return self.x * y
-
-        i = C()
-
-        self.ft = unbound.bind_instance(i)
-        self.add = i.add
-        self.mult = i.mult
-
-
-
-class BoundFunctionTableinsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
+class FunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
 
     addargs = (3,)
     addresult = 45
@@ -181,26 +163,33 @@ class BoundFunctionTableinsideClassTests (unittest.TestCase, GeneralFunctionTabl
     def setUp(self):
 
         class C (object):
-            clstable = FunctionTable()
+            ft = FunctionTableProperty()
 
             x = 42
 
-            @clstable.register
+            @ft.register
             def add(self, y):
                 return self.x + y
 
-            @clstable.register
+            @ft.register
             def mult(self, y):
                 return self.x * y
 
-            def __init__(self):
-                self.boundtable = self.clstable.bind_instance(self)
-
         i = C()
 
-        self.ft = i.boundtable
+        self.cls = C
+        self.instance = i
+        self.ft = i.ft
         self.add = i.add
         self.mult = i.mult
+
+    def test_unbound_lookup(self):
+        for name in self.funcnames:
+            self.assertIsInstance(self.cls.ft[name], FunctionType)
+
+    def test_bound_lookup(self):
+        for name in self.funcnames:
+            self.assertIsInstance(self.instance.ft[name], MethodType)
 
 
 

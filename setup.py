@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys
-from distutils.core import setup
+from setuptools import setup
 
 
 if 'upload' in sys.argv:
@@ -17,4 +17,5 @@ setup(name = 'functable',
       author = 'Nathan Wilcox',
       author_email = 'nejucomo@gmail.com',
       py_modules = ['functable'],
+      install_requires=['proptools >= 0.1'],
       )
