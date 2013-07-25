@@ -9,7 +9,9 @@ echo 'pyflakes completed.'
 
 
 echo -e '\n=== Running unittests ==='
-coverage run --branch ./functable.py --verbose
+TRIAL="$(which trial)"
+
+coverage run --branch "$TRIAL" ./functable.py
 STATUS=$?
 
 echo -e '\n--- Generating Coverage Report ---'
