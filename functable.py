@@ -41,39 +41,14 @@ class FunctionTable (Mapping):
 
 
 # Unit test code:
-class FunctionTableTests (unittest.TestCase):
-    def test_mapping_methods(self):
-        ft = FunctionTable()
+class GeneralFunctionTableTests (object):
+    # This abstract class expects the following attributes:
+    # ft   - a FunctionTable (may be bound)
+    # add  - a function or bound method
+    # mult - a function or bound method
 
-        @ft.register
-        def add(x, y):
-            return x + y
-
-        @ft.register
-        def mult(x, y):
-            return x * y
-
-        self._test_mapping_methods(ft, add, mult)
-
-    def test_mapping_methods_on_bound_table(self):
-
-        unbound = FunctionTable()
-
-        class C (object):
-            x = 42
-
-            @unbound.register
-            def add(self, y):
-                return self.x + y
-
-            @unbound.register
-            def mult(self, y):
-                return self.x * y
-
-        i = C()
-        bound = unbound.bind_instance(i)
-
-        self._test_mapping_methods(bound, i.add, i.mult)
+    def test_everything(self):
+        self._test_mapping_methods(self.ft, self.add, self.mult)
 
 
     def _test_mapping_methods(self, ft, add, mult):
@@ -109,6 +84,50 @@ class FunctionTableTests (unittest.TestCase):
 
         sentinel = object()
         self.assertIs(sentinel, ft.get('NON_EXISTENT', sentinel))
+
+
+
+class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    def setUp(self):
+        self.ft = FunctionTable()
+
+        @self.ft.register
+        def add(x, y):
+            return x + y
+
+        self.add = add
+
+        @self.ft.register
+        def mult(x, y):
+            return x * y
+
+        self.mult = mult
+
+
+
+class BoundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    def setUp(self):
+
+        unbound = FunctionTable()
+
+        class C (object):
+            x = 42
+
+            @unbound.register
+            def add(self, y):
+                return self.x + y
+
+            @unbound.register
+            def mult(self, y):
+                return self.x * y
+
+        i = C()
+
+        self.ft = unbound.bind_instance(i)
+        self.add = i.add
+        self.mult = i.mult
 
 
 
