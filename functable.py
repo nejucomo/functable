@@ -92,11 +92,20 @@ class FunctionTableTests (unittest.TestCase):
         self.assertEqual([('add', add), ('mult', mult)], sorted(ft.items()))
         self.assertEqual([('add', add), ('mult', mult)], sorted(list(ft.iteritems())))
 
-        self.assertIs(add, ft['add'])
-        self.assertIs(mult, ft['mult'])
+        def assertIsOrIsEquivalentMethod(a, b):
+            if isinstance(a, MethodType) and isinstance(b, MethodType):
+                a = a.im_func
+                b = b.im_func
+            self.assertIs(a, b)
 
-        self.assertIs(add, ft.get('add'))
-        self.assertIs(mult, ft.get('mult'))
+        assertIsOrIsEquivalentMethod(add, ft['add'])
+        assertIsOrIsEquivalentMethod(mult, ft['mult'])
+
+        assertIsOrIsEquivalentMethod(add, ft.get('add'))
+        assertIsOrIsEquivalentMethod(mult, ft.get('mult'))
+
+        assertIsOrIsEquivalentMethod(add, ft.get('add', 'banana'))
+        assertIsOrIsEquivalentMethod(mult, ft.get('mult', 'bongo drum'))
 
         sentinel = object()
         self.assertIs(sentinel, ft.get('NON_EXISTENT', sentinel))
