@@ -1,18 +1,21 @@
 #! /usr/bin/env python
 
+__all__ = ['FunctionTable']
+
+
 import unittest
 from collections import Mapping
 from types import MethodType
-from weakref import WeakKeyDictionary
 
 
 
 class FunctionTable (Mapping):
+
     def __init__(self):
         self._table = {}
 
     def register(self, f):
-        """A decorator which registers the function in this table."""
+        """A decorator which registers the function in this table and returns f unmodified."""
         self._table[f.__name__] = f
         return f
 
@@ -34,15 +37,6 @@ class FunctionTable (Mapping):
 
     def __len__(self):
         return len(self._table)
-
-
-
-class Facet (object):
-    def __init__(self, table):
-        self.table = table
-
-    def __getattr__(self, name):
-        return self.table[name]
 
 
 
@@ -106,12 +100,6 @@ class FunctionTableTests (unittest.TestCase):
 
         sentinel = object()
         self.assertIs(sentinel, ft.get('NON_EXISTENT', sentinel))
-
-
-class FacetTests (unittest.TestCase):
-
-    def test_facet(self):
-        raise NotImplementedError()
 
 
 
