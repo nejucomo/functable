@@ -47,6 +47,12 @@ class GeneralFunctionTableTests (object):
     # add  - a function or bound method
     # mult - a function or bound method
 
+    # addresult - the result of calling add
+    # addargs   - a tuple to pass to add
+
+    # multresult - the result of calling mult
+    # multargs   - a tuple to pass to mult
+
     # This method can be overridden:
     def _get_func(self, f):
         assert isinstance(f, MethodType)
@@ -101,9 +107,19 @@ class GeneralFunctionTableTests (object):
         sentinel = object()
         self.assertIs(sentinel, self.ft.get('NON_EXISTENT', sentinel))
 
+    def test_call_add(self):
+        self.assertEqual(self.addresult, self.ft['add'](*self.addargs))
+        self.assertEqual(self.multresult, self.ft['mult'](*self.multargs))
+
 
 
 class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    addargs = (2, 3)
+    addresult = 5
+
+    multargs = (2, 3)
+    multresult = 6
 
     def setUp(self):
         self.ft = FunctionTable()
@@ -126,6 +142,12 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
 
 class BoundFunctionTableOutsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    addargs = (3,)
+    addresult = 45
+
+    multargs = (3,)
+    multresult = 126
 
     def setUp(self):
 
@@ -151,6 +173,12 @@ class BoundFunctionTableOutsideClassTests (unittest.TestCase, GeneralFunctionTab
 
 
 class BoundFunctionTableinsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    addargs = (3,)
+    addresult = 45
+
+    multargs = (3,)
+    multresult = 126
 
     def setUp(self):
 
