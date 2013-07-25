@@ -125,7 +125,7 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
 
 
-class BoundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+class BoundFunctionTableOutsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
 
     def setUp(self):
 
@@ -145,6 +145,34 @@ class BoundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
         i = C()
 
         self.ft = unbound.bind_instance(i)
+        self.add = i.add
+        self.mult = i.mult
+
+
+
+class BoundFunctionTableinsideClassTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    def setUp(self):
+
+        class C (object):
+            clstable = FunctionTable()
+
+            x = 42
+
+            @clstable.register
+            def add(self, y):
+                return self.x + y
+
+            @clstable.register
+            def mult(self, y):
+                return self.x * y
+
+            def __init__(self):
+                self.boundtable = self.clstable.bind_instance(self)
+
+        i = C()
+
+        self.ft = i.boundtable
         self.add = i.add
         self.mult = i.mult
 
