@@ -65,16 +65,19 @@ class GeneralFunctionTableTests (object):
         self.failUnless('mult' in self.ft)
 
     def test_keys_and_iterkeys(self):
-        self.assertEqual(['add', 'mult'], sorted(self.ft.keys()))
-        self.assertEqual(['add', 'mult'], sorted(list(self.ft.iterkeys())))
+        expected = ['add', 'mult']
+        self.assertEqual(expected, sorted(self.ft.keys()))
+        self.assertEqual(expected, sorted(list(self.ft.iterkeys())))
 
     def test_values_and_itervalues(self):
-        self.assertEqual(set([self.add, self.mult]), set(self.ft.values()))
-        self.assertEqual(set([self.add, self.mult]), set(self.ft.itervalues()))
+        expected = set([self.add, self.mult])
+        self.assertEqual(expected, set(self.ft.values()))
+        self.assertEqual(expected, set(self.ft.itervalues()))
 
     def test_items_and_iteritems(self):
-        self.assertEqual([('add', self.add), ('mult', self.mult)], sorted(self.ft.items()))
-        self.assertEqual([('add', self.add), ('mult', self.mult)], sorted(list(self.ft.iteritems())))
+        expected = [('add', self.add), ('mult', self.mult)]
+        self.assertEqual(expected, sorted(self.ft.items()))
+        self.assertEqual(expected, sorted(list(self.ft.iteritems())))
 
     def test___getitem__successful(self):
         self._assertIsEquivalent(self.add, self.ft['add'])
