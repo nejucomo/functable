@@ -69,7 +69,33 @@ With functable, we can write this:
 
 Notice that if code wants to call the command functions elsewhere,
 in the first example they must call "cmd_add(2, 3)", but with a
-FunctionTable approach, they can naturally call "add(2, 3)".
+FunctionTable approach, they can naturally call "add(2, 3)".  The "cmd_"
+prefix is used to manage a namespace of commands in an ad-hoc manner.
+With FunctionTable this namespace is handled in a principled manner.
+
+The FunctionTableProperty class is useful for the same kind of
+principled namespace management, except on methods of a class, rather
+than stand-alone functions:
+
+>>> from functable import FunctionTableProperty
+>>> class C (object):
+...     value = 5
+...
+...     operations = FunctionTableProperty()
+...
+...     @operations.register
+...     def add(self, x):
+...         return self.value + x
+...
+>>> C.operations.keys()
+['add']
+>>> obj = C()
+>>> obj.operations['add'](7)
+12
+>>> type(C.operations['add']) # the class-scoped table holds unbound methods:
+<type 'function'>
+>>> C.operations['add'](obj, 7)
+12
 """
 
 __all__ = ['FunctionTable', 'FunctionTableProperty']
