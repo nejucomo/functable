@@ -47,43 +47,56 @@ class GeneralFunctionTableTests (object):
     # add  - a function or bound method
     # mult - a function or bound method
 
-    def test_everything(self):
-        self._test_mapping_methods(self.ft, self.add, self.mult)
+    # This method can be overridden:
+    def _get_func(self, f):
+        assert isinstance(f, MethodType)
+        return f.im_func
 
+    # The former method is used for this test criterion:
+    def _assertIsEquivalent(self, a, b):
+        self.assertIs(self._get_func(a), self._get_func(b))
 
-    def _test_mapping_methods(self, ft, add, mult):
+    # Tests:
+    def test_len(self):
+        self.assertEqual(2, len(self.ft))
 
-        self.assertEqual(2, len(ft))
+    def test_membership(self):
+        self.failUnless('add' in self.ft)
+        self.failUnless('mult' in self.ft)
 
-        self.failUnless('add' in ft)
-        self.failUnless('mult' in ft)
+    def test_keys_and_iterkeys(self):
+        self.assertEqual(['add', 'mult'], sorted(self.ft.keys()))
+        self.assertEqual(['add', 'mult'], sorted(list(self.ft.iterkeys())))
 
-        self.assertEqual(['add', 'mult'], sorted(ft.keys()))
-        self.assertEqual(['add', 'mult'], sorted(list(ft.iterkeys())))
+    def test_values_and_itervalues(self):
+        self.assertEqual(set([self.add, self.mult]), set(self.ft.values()))
+        self.assertEqual(set([self.add, self.mult]), set(self.ft.itervalues()))
 
-        self.assertEqual(set([add, mult]), set(ft.values()))
-        self.assertEqual(set([add, mult]), set(ft.itervalues()))
+    def test_items_and_iteritems(self):
+        self.assertEqual([('add', self.add), ('mult', self.mult)], sorted(self.ft.items()))
+        self.assertEqual([('add', self.add), ('mult', self.mult)], sorted(list(self.ft.iteritems())))
 
-        self.assertEqual([('add', add), ('mult', mult)], sorted(ft.items()))
-        self.assertEqual([('add', add), ('mult', mult)], sorted(list(ft.iteritems())))
+    def test___getitem__successful(self):
+        self._assertIsEquivalent(self.add, self.ft['add'])
+        self._assertIsEquivalent(self.mult, self.ft['mult'])
 
-        def assertIsOrIsEquivalentMethod(a, b):
-            if isinstance(a, MethodType) and isinstance(b, MethodType):
-                a = a.im_func
-                b = b.im_func
-            self.assertIs(a, b)
+    def test___getitem__unsuccessful(self):
+        self.assertRaises(KeyError, self.ft.__getitem__, 'NON_EXISTENT')
 
-        assertIsOrIsEquivalentMethod(add, ft['add'])
-        assertIsOrIsEquivalentMethod(mult, ft['mult'])
+    def test_successful_get_no_default(self):
+        self._assertIsEquivalent(self.add, self.ft.get('add'))
+        self._assertIsEquivalent(self.mult, self.ft.get('mult'))
 
-        assertIsOrIsEquivalentMethod(add, ft.get('add'))
-        assertIsOrIsEquivalentMethod(mult, ft.get('mult'))
+    def test_successful_get_with_default(self):
+        self._assertIsEquivalent(self.add, self.ft.get('add', 'banana'))
+        self._assertIsEquivalent(self.mult, self.ft.get('mult', 'bongo drum'))
 
-        assertIsOrIsEquivalentMethod(add, ft.get('add', 'banana'))
-        assertIsOrIsEquivalentMethod(mult, ft.get('mult', 'bongo drum'))
+    def test_unsuccessful_get_no_default(self):
+        self.assertIs(None, self.ft.get('NON_EXISTENT'))
 
+    def test_unsuccessful_get_with_default(self):
         sentinel = object()
-        self.assertIs(sentinel, ft.get('NON_EXISTENT', sentinel))
+        self.assertIs(sentinel, self.ft.get('NON_EXISTENT', sentinel))
 
 
 
@@ -103,6 +116,9 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
             return x * y
 
         self.mult = mult
+
+    def _get_func(self, f):
+        return f
 
 
 
