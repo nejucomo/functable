@@ -111,12 +111,16 @@ from proptools import LazyProperty
 
 class FunctionTable (Mapping):
 
-    def __init__(self):
+    def __init__(self, prefix=''):
+        self.prefix = prefix
         self._table = {}
 
     def register(self, f):
         """A decorator which registers the function in this table and returns f unmodified."""
-        self._table[f.__name__] = f
+        fname = f.__name__
+        assert fname.startswith(self.prefix), repr(f)
+        key = fname[len(self.prefix):]
+        self._table[key] = f
         return f
 
     # Mapping interface:
@@ -132,13 +136,13 @@ class FunctionTable (Mapping):
 
 class FunctionTableProperty (FunctionTable, LazyProperty):
 
-    def __init__(self):
-        FunctionTable.__init__(self)
+    def __init__(self, prefix=''):
+        FunctionTable.__init__(self, prefix)
 
         def bind(instance):
             """Return a function table of methods bound to instance."""
             cls = type(instance)
-            boundtable = FunctionTable()
+            boundtable = FunctionTable(self.prefix)
             for name, unbound in self.iteritems():
                 bound = MethodType(unbound, instance, cls)
                 boundtable.register(bound)
@@ -252,6 +256,34 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
 
 
+class UnboundPrefixedFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    addargs = (2, 3)
+    addresult = 5
+
+    multargs = (2, 3)
+    multresult = 6
+
+    def setUp(self):
+        self.ft = FunctionTable('foo_')
+
+        @self.ft.register
+        def foo_add(x, y):
+            return x + y
+
+        self.add = foo_add
+
+        @self.ft.register
+        def foo_mult(x, y):
+            return x * y
+
+        self.mult = foo_mult
+
+    def _get_func(self, f):
+        return f
+
+
+
 class FunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
 
     addargs = (3,)
@@ -282,6 +314,47 @@ class FunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
         self.ft = i.ft
         self.add = i.add
         self.mult = i.mult
+
+    def test_unbound_lookup(self):
+        for name in self.funcnames:
+            self.assertIsInstance(self.cls.ft[name], FunctionType)
+
+    def test_bound_lookup(self):
+        for name in self.funcnames:
+            self.assertIsInstance(self.instance.ft[name], MethodType)
+
+
+
+class PrefixedFunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
+
+    addargs = (3,)
+    addresult = 45
+
+    multargs = (3,)
+    multresult = 126
+
+    def setUp(self):
+
+        class C (object):
+            ft = FunctionTableProperty('foo_')
+
+            x = 42
+
+            @ft.register
+            def foo_add(self, y):
+                return self.x + y
+
+            @ft.register
+            def foo_mult(self, y):
+                return self.x * y
+
+        i = C()
+
+        self.cls = C
+        self.instance = i
+        self.ft = i.ft
+        self.add = i.foo_add
+        self.mult = i.foo_mult
 
     def test_unbound_lookup(self):
         for name in self.funcnames:
