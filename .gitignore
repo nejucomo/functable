@@ -3,3 +3,4 @@ htmlcov/
 _trial_temp/
 functable.egg-info/
 functable.pyc
+dist/
