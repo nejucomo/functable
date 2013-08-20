@@ -151,12 +151,13 @@ class FunctionTable (Mapping):
         self.prefix = prefix
         self._table = {}
 
-    def register(self, f):
+    def register(self, f, name=None):
         """A decorator which registers the function in this table and returns f unmodified."""
-        fname = f.__name__
-        assert fname.startswith(self.prefix), repr((self.prefix, f))
-        key = fname[len(self.prefix):]
-        self._table[key] = f
+        if name is None:
+            name = f.__name__
+            assert name.startswith(self.prefix), repr((self.prefix, f))
+            name = name[len(self.prefix):]
+        self._table[name] = f
         return f
 
     # Mapping interface:
@@ -289,6 +290,10 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
     def _get_func(self, f):
         return f
+
+    def test_explicit_name(self):
+        self.ft.register(lambda a, b: a ** b, 'pow')
+        self.assertEqual(8, self.ft['pow'](2, 3))
 
 
 
