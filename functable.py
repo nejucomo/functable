@@ -96,6 +96,42 @@ than stand-alone functions:
 <type 'function'>
 >>> C.operations['add'](obj, 7)
 12
+
+However, sometimes it's important to distinguish the key names from the
+actual method names, for example if there are multiple FunctionTables
+with the same key namespace.  This is possible with the prefix argument
+to the FunctionTable or FunctionTableProperty classes:
+
+>>> class Codec (object):
+...     encoders = FunctionTableProperty('_enc_')
+...     decoders = FunctionTableProperty('_dec_')
+...
+...     def encode(self, obj):
+...         tag = type(obj).__name__
+...         encoding = self.encoders[tag](obj)
+...         return (tag, encoding)
+...
+...     def decode(self, tup):
+...         (tag, encoding) = tup
+...         return self.decoders[tag](encoding)
+...
+...     @encoders.register
+...     def _enc_int(self, i):
+...         return str(i)
+...
+...     @decoders.register
+...     def _dec_int(self, s):
+...         return int(s)
+...
+>>> codec = Codec()
+>>> codec.encode(42)
+('int', '42')
+>>> codec.decode(('int', '42'))
+42
+>>> codec.encoders.keys()
+['int']
+>>> codec.decoders.keys()
+['int']
 """
 
 __all__ = ['FunctionTable', 'FunctionTableProperty']
@@ -118,7 +154,7 @@ class FunctionTable (Mapping):
     def register(self, f):
         """A decorator which registers the function in this table and returns f unmodified."""
         fname = f.__name__
-        assert fname.startswith(self.prefix), repr(f)
+        assert fname.startswith(self.prefix), repr((self.prefix, f))
         key = fname[len(self.prefix):]
         self._table[key] = f
         return f
