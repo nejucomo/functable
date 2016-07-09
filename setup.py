@@ -9,13 +9,14 @@ if 'upload' in sys.argv:
         raise SystemExit('Refusing to upload unsigned packages.')
 
 
-setup(name = 'functable',
-      description = 'A small utility for grouping functions or methods into a table.',
-      url = 'https://github.org/nejucomo/functable',
-      license = 'GPLv3',
-      version = '0.2.dev1',
-      author = 'Nathan Wilcox',
-      author_email = 'nejucomo@gmail.com',
-      py_modules = ['functable'],
-      install_requires=['proptools >= 0.1'],
-      )
+setup(
+    name='functable',
+    description='A small utility for grouping functions/methods into a table.',
+    url='https://github.org/nejucomo/functable',
+    license='GPLv3',
+    version='0.2.dev1',
+    author='Nathan Wilcox',
+    author_email='nejucomo@gmail.com',
+    py_modules=['functable'],
+    install_requires=['proptools >= 0.1'],
+)
