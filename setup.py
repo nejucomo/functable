@@ -14,7 +14,7 @@ setup(
     description='A small utility for grouping functions/methods into a table.',
     url='https://github.org/nejucomo/functable',
     license='GPLv3',
-    version='0.2.dev1',
+    version='0.2',
     author='Nathan Wilcox',
     author_email='nejucomo@gmail.com',
     py_modules=['functable'],
