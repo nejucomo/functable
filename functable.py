@@ -134,15 +134,14 @@ to the FunctionTable or FunctionTableProperty classes:
 ['int']
 """
 
-__all__ = ['FunctionTable', 'FunctionTableProperty']
-
-
 import unittest
 from collections import Mapping
 from types import MethodType, FunctionType
 
 from proptools import LazyProperty
 
+
+__all__ = ['FunctionTable', 'FunctionTableProperty']
 
 
 class FunctionTable (Mapping):
@@ -152,7 +151,7 @@ class FunctionTable (Mapping):
         self._table = {}
 
     def register(self, f, name=None):
-        """A decorator which registers the function in this table and returns f unmodified."""
+        """Register f in self, and return f unmodified (for decorator use)."""
         if name is None:
             name = f.__name__
             assert name.startswith(self.prefix), repr((self.prefix, f))
@@ -186,7 +185,6 @@ class FunctionTableProperty (FunctionTable, LazyProperty):
             return boundtable
 
         LazyProperty.__init__(self, bind)
-
 
 
 # Unit test code:
@@ -264,7 +262,6 @@ class GeneralFunctionTableTests (object):
         self.assertEqual(self.multresult, self.ft['mult'](*self.multargs))
 
 
-
 class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
 
     addargs = (2, 3)
@@ -296,8 +293,9 @@ class UnboundFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
         self.assertEqual(8, self.ft['pow'](2, 3))
 
 
-
-class UnboundPrefixedFunctionTableTests (unittest.TestCase, GeneralFunctionTableTests):
+class UnboundPrefixedFunctionTableTests (
+        unittest.TestCase,
+        GeneralFunctionTableTests):
 
     addargs = (2, 3)
     addresult = 5
@@ -324,8 +322,9 @@ class UnboundPrefixedFunctionTableTests (unittest.TestCase, GeneralFunctionTable
         return f
 
 
-
-class FunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
+class FunctionTablePropertyTests (
+        unittest.TestCase,
+        GeneralFunctionTableTests):
 
     addargs = (3,)
     addresult = 45
@@ -365,8 +364,9 @@ class FunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
             self.assertIsInstance(self.instance.ft[name], MethodType)
 
 
-
-class PrefixedFunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTableTests):
+class PrefixedFunctionTablePropertyTests (
+        unittest.TestCase,
+        GeneralFunctionTableTests):
 
     addargs = (3,)
     addresult = 45
@@ -404,6 +404,3 @@ class PrefixedFunctionTablePropertyTests (unittest.TestCase, GeneralFunctionTabl
     def test_bound_lookup(self):
         for name in self.funcnames:
             self.assertIsInstance(self.instance.ft[name], MethodType)
-
-
-
